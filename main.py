@@ -60,12 +60,21 @@ def transform(**kwargs):
 def load(**kwargs):
     df_links = Variable.get("df_links", deserialize_json=True)
 
-"""
-for source in sources:
-    extract(source)
-    transform()
-    load()
-"""
+    # type checking
+    if type(df_links) != pd.DataFrame:
+        df_links = pd.read_json(df_links)
+
+    # create csv dataset
+    df_links.to_csv('/opt/airflow/dags/data/link_data.csv', index=False)
+
+    # version the dataset and push to dvc
+    dvc_command = ['cd "E:/Semester VIII/MLOps/airflow/dags"', 'dvc add ./data/link_data.csv', 'dvc push']
+    git_command = ['cd "E:/Semester VIII/MLOps/airflow/dags"', 'git add .', 'git commit -m "New Dataset"', 'git push origin master'] 
+
+    os.system(' && '.join(dvc_command))
+    os.system(' && '.join(git_command))
+
+# END of Load Function
 
 default_args = {
     'owner' : 'airflow-demo'
